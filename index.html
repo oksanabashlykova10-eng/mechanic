@@ -760,9 +760,8 @@ const lines = (text || "").split(/\r?\n|\\n/g).map(l=>l.trim()).filter(Boolean);
 function buildGameHtml(state){
   const t = state.texts;
   const tasks = state.tasks;
-  const qBlock = tasks.map(x=>x.q).join('\\n');
-  const aBlock = tasks.map(x=>`${x.a0}|${x.a1}|${x.a2}`).join('\\n');
-
+  const qBlock = tasks.map(x=>x.q).join('\n');
+const aBlock = tasks.map(x=>`${x.a0}|${x.a1}|${x.a2}`).join('\n');
   const ui = state.neonOn ? state.uiColor : '#7a7a7a';
 
   const bgCSS = (()=>{
