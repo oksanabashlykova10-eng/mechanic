@@ -1240,8 +1240,8 @@ function shuffle(arr){
   return arr;
 }
 function parseBlocks(qBlock, aBlock){
-  const qs = qBlock.split("\\n").map(s=>s.trim()).filter(Boolean);
-  const as = aBlock.split("\\n").map(s=>s.trim()).filter(Boolean);
+const qs = (qBlock || "").split(/\r?\n|\\n/g).map(s=>s.trim()).filter(Boolean);
+const as = (aBlock || "").split(/\r?\n|\\n/g).map(s=>s.trim()).filter(Boolean);
   const n = Math.min(qs.length, as.length);
   const items = [];
   for(let i=0;i<n;i++){
