@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Редактор — Heart of the Stone Machine</title>
+<title>Machine Game Editor</title>
 <style>
   :root{
     --bg:#070A0F;
@@ -23,8 +23,35 @@
   canvas#stars{position:fixed; inset:0; z-index:0;}
   .pane{position:relative; z-index:1; border:1px solid var(--stroke); background:linear-gradient(180deg, rgba(10,14,22,.78), rgba(10,14,22,.55)); border-radius:18px; box-shadow:0 0 30px rgba(0,255,213,.08); overflow:hidden;}
   .left{display:flex; flex-direction:column;}
-  .hdr{padding:14px 14px 10px; border-bottom:1px solid rgba(0,255,213,.14); display:flex; align-items:center; justify-content:space-between; gap:10px;}
-  .hdr h1{margin:0;font-size:15px; letter-spacing:.3px;}
+  .hdr{
+    padding:12px 14px;
+    border-bottom:1px solid rgba(0,255,213,.14);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .brand{display:flex; align-items:center; gap:12px; min-width:0;}
+  .brandLogo{
+    width:46px; height:46px; flex:0 0 46px;
+    border-radius:14px;
+    background:
+      url('https://img.genially.com/67961b32a116fb001568a75e/673752a5-8d4d-40d1-9b5f-f04ebd91a27c.png')
+      center/contain no-repeat;
+    box-shadow:
+      0 0 0 2px rgba(0,255,213,.55),
+      0 0 28px rgba(0,255,213,.18),
+      0 0 12px rgba(0,255,213,.14) inset;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.45));
+  }
+  .brandText{
+    display:flex; flex-direction:column; gap:2px; min-width:0;
+  }
+  .brandText .t1{
+    font-weight:900; letter-spacing:.2px; font-size:13px; color:var(--txt);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .brandText .t2{
+    font-size:11px; color:rgba(234,255,255,.62);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
   .badge{font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid rgba(0,255,213,.25); background:rgba(0,255,213,.06); color:var(--muted)}
   .tabs{display:flex; flex-wrap:wrap; gap:8px; padding:10px 14px;}
   .tabBtn{
@@ -34,7 +61,7 @@
     padding:8px 10px;
     border-radius:12px;
     cursor:pointer;
-    font-weight:700;
+    font-weight:800;
     font-size:12px;
     transition:.15s;
   }
@@ -87,6 +114,18 @@
   .switch{display:flex; gap:10px; align-items:center; padding:10px; border:1px solid rgba(0,255,213,.14); border-radius:14px; background:rgba(0,0,0,.18);}
   .switch input{transform:scale(1.15);}
   .fileRow{display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:end;}
+
+  /* footer */
+  .footer{
+    padding:8px 14px 12px;
+    color:rgba(234,255,255,.55);
+    font-size:11px;
+    border-top:1px solid rgba(0,255,213,.10);
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .footer .copy{white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -96,7 +135,13 @@
   <!-- LEFT -->
   <div class="pane left">
     <div class="hdr">
-      <h1>Редактор игры (GitHub Pages → Genially)</h1>
+      <div class="brand">
+        <div class="brandLogo" aria-label="English Bootcamp logo"></div>
+        <div class="brandText">
+          <div class="t1">Machine Game Editor by English Bootcamp</div>
+          <div class="t2">Настройка → предпросмотр → копирование iframe</div>
+        </div>
+      </div>
       <div class="badge">1 список / 10 заданий</div>
     </div>
 
@@ -106,7 +151,6 @@
       <button class="tabBtn" data-tab="gears">Шестерёнки</button>
       <button class="tabBtn" data-tab="screens">Заставки</button>
       <button class="tabBtn" data-tab="audio">Аудио</button>
-      <button class="tabBtn" data-tab="export">Экспорт</button>
     </div>
 
     <div class="content">
@@ -143,22 +187,65 @@
             </div>
           </div>
         </div>
+
+        <div class="card">
+          <h3>Шрифты: вопросы и ответы</h3>
+          <div class="row">
+            <div>
+              <label>Вопрос — шрифт</label>
+              <select id="qFont">
+                <option value="Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" selected>Arial / System</option>
+                <option value="'Comic Sans MS','Comic Sans',cursive">Comic Sans MS (комикс)</option>
+                <option value="'Trebuchet MS', Trebuchet, Arial, sans-serif">Trebuchet MS</option>
+                <option value="Georgia, 'Times New Roman', serif">Georgia</option>
+                <option value="'Courier New', Courier, monospace">Courier New</option>
+              </select>
+            </div>
+            <div>
+              <label>Вопрос — размер (px)</label>
+              <input id="qFontSize" type="number" min="12" max="48" value="22"/>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Вопрос — цвет</label>
+              <input id="qColor" type="color" value="#eaffff"/>
+            </div>
+            <div class="mini" style="align-self:end;">Панель вопроса остаётся картинкой (меняется во вкладке “Внешний вид”).</div>
+          </div>
+
+          <hr style="border:none;border-top:1px solid rgba(0,255,213,.12);margin:12px 0;">
+
+          <div class="row">
+            <div>
+              <label>Ответы — шрифт</label>
+              <select id="aFont">
+                <option value="Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" selected>Arial / System</option>
+                <option value="'Comic Sans MS','Comic Sans',cursive">Comic Sans MS (комикс)</option>
+                <option value="'Trebuchet MS', Trebuchet, Arial, sans-serif">Trebuchet MS</option>
+                <option value="Georgia, 'Times New Roman', serif">Georgia</option>
+                <option value="'Courier New', Courier, monospace">Courier New</option>
+              </select>
+            </div>
+            <div>
+              <label>Ответы — размер (px)</label>
+              <input id="aFontSize" type="number" min="12" max="40" value="18"/>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Ответы — цвет</label>
+              <input id="aColor" type="color" value="#eaffff"/>
+            </div>
+            <div></div>
+          </div>
+        </div>
       </div>
 
       <!-- LOOK -->
       <div class="section" id="sec_look">
         <div class="card">
-          <h3>Шрифт и цвета</h3>
-          <div class="row">
-            <div>
-              <label>Шрифт (CSS font-family)</label>
-              <input id="fontFamily" type="text" value="Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"/>
-            </div>
-            <div>
-              <label>Основной цвет текста</label>
-              <input id="textColor" type="color" value="#eaffff"/>
-            </div>
-          </div>
+          <h3>Цвета и неон</h3>
           <div class="row">
             <div>
               <label>Неон включен</label>
@@ -172,28 +259,39 @@
               <input id="uiColor" type="color" value="#00ffd5"/>
             </div>
           </div>
+        </div>
+
+        <div class="card">
+          <h3>Фон игры</h3>
           <div class="row">
             <div>
-              <label>Фон игры</label>
+              <label>Режим фона</label>
               <select id="bgMode">
                 <option value="url" selected>URL картинки</option>
                 <option value="upload">Загрузить свою картинку</option>
+                <option value="color">Цвет (однотонный)</option>
                 <option value="transparent">Прозрачный фон</option>
               </select>
+              <div class="mini">“Цвет” — это однотонная заливка.</div>
             </div>
-            <div class="twoLine">
-              <div class="fileRow">
-                <div>
-                  <label>URL фона (если выбран URL)</label>
-                  <input id="bgUrl" type="text" value="https://img.genially.com/67961b32a116fb001568a75e/d58b1f28-a8e9-4bdf-93d2-0e9c18b8588c.png"/>
-                </div>
-                <div>
-                  <label>Файл</label>
-                  <input id="bgFile" type="file" accept="image/*"/>
-                </div>
+            <div>
+              <label>Цвет фона (для режима “Цвет”)</label>
+              <input id="bgColor" type="color" value="#000000"/>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="fileRow">
+              <div>
+                <label>URL фона (если выбран URL)</label>
+                <input id="bgUrl" type="text" value="https://img.genially.com/67961b32a116fb001568a75e/d58b1f28-a8e9-4bdf-93d2-0e9c18b8588c.png"/>
               </div>
-              <div class="mini">Если выбран “прозрачный”, картинка не используется.</div>
+              <div>
+                <label>Файл</label>
+                <input id="bgFile" type="file" accept="image/*"/>
+              </div>
             </div>
+            <div class="mini" style="align-self:end;">Если выбран “прозрачный”, картинка не используется.</div>
           </div>
         </div>
 
@@ -270,6 +368,14 @@
 
           <div class="mini">Загрузка файла заменяет URL (встраивается как dataURL прямо в игру).</div>
         </div>
+
+        <div class="card">
+          <h3>Автообновление превью</h3>
+          <div class="switch">
+            <input id="autoUpdate" type="checkbox" checked>
+            <div>Автообновление превью при изменениях</div>
+          </div>
+        </div>
       </div>
 
       <!-- GEARS -->
@@ -322,7 +428,7 @@
       <!-- SCREENS -->
       <div class="section" id="sec_screens">
         <div class="card">
-          <h3>Название игры и тексты заставок</h3>
+          <h3>Тексты заставок</h3>
           <div class="row">
             <div>
               <label>Название игры (title)</label>
@@ -376,6 +482,59 @@
               <label>Game Over: текст</label>
               <input id="overText" type="text" value="No lives left. Try again!"/>
             </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Шрифты заставок (отдельно title и текст)</h3>
+          <div class="row">
+            <div>
+              <label>Title — шрифт</label>
+              <select id="ovTitleFont">
+                <option value="Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" selected>Arial / System</option>
+                <option value="'Comic Sans MS','Comic Sans',cursive">Comic Sans MS (комикс)</option>
+                <option value="'Trebuchet MS', Trebuchet, Arial, sans-serif">Trebuchet MS</option>
+                <option value="Georgia, 'Times New Roman', serif">Georgia</option>
+                <option value="'Courier New', Courier, monospace">Courier New</option>
+              </select>
+            </div>
+            <div>
+              <label>Title — размер (px)</label>
+              <input id="ovTitleSize" type="number" min="18" max="72" value="52"/>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Title — цвет</label>
+              <input id="ovTitleColor" type="color" value="#eaffff"/>
+            </div>
+            <div></div>
+          </div>
+
+          <hr style="border:none;border-top:1px solid rgba(0,255,213,.12);margin:12px 0;">
+
+          <div class="row">
+            <div>
+              <label>Текст — шрифт</label>
+              <select id="ovTextFont">
+                <option value="Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" selected>Arial / System</option>
+                <option value="'Comic Sans MS','Comic Sans',cursive">Comic Sans MS (комикс)</option>
+                <option value="'Trebuchet MS', Trebuchet, Arial, sans-serif">Trebuchet MS</option>
+                <option value="Georgia, 'Times New Roman', serif">Georgia</option>
+                <option value="'Courier New', Courier, monospace">Courier New</option>
+              </select>
+            </div>
+            <div>
+              <label>Текст — размер (px)</label>
+              <input id="ovTextSize" type="number" min="12" max="32" value="18"/>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Текст — цвет</label>
+              <input id="ovTextColor" type="color" value="#eaffff"/>
+            </div>
+            <div></div>
           </div>
         </div>
 
@@ -436,40 +595,18 @@
           </div>
         </div>
       </div>
-
-      <!-- EXPORT -->
-      <div class="section" id="sec_export">
-        <div class="card">
-          <h3>Экспорт</h3>
-          <div class="help">1) Нажми “Обновить превью” (или “Автообновление”)<br>
-          2) Нажми “Скопировать iframe для Genially” и вставь в Genially.</div>
-          <div class="switch" style="margin-top:10px;">
-            <input id="autoUpdate" type="checkbox" checked>
-            <div>Автообновление превью при изменениях</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Iframe код</h3>
-          <label>Сюда появится готовый iframe (для копирования)</label>
-          <textarea id="iframeOut" style="min-height:140px;"></textarea>
-        </div>
-
-        <div class="card">
-          <h3>GitHub Pages (коротко)</h3>
-          <div class="mini">
-            1) Создай репозиторий и положи <b>index.html</b> в корень<br>
-            2) Settings → Pages → Deploy from branch → main / root<br>
-            3) В Genially вставь iframe на URL страницы редактора<br>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div class="btnRow">
       <button class="btn primary" id="applyBtn">Обновить превью</button>
       <button class="btn" id="copyBtn">Скопировать iframe для Genially</button>
       <button class="btn danger" id="resetBtn">Сбросить к базовым</button>
+      <textarea id="iframeOut" style="position:absolute;left:-9999px;top:-9999px;height:1px;width:1px;opacity:0;"></textarea>
+    </div>
+
+    <div class="footer">
+      <div class="copy">© Все права принадлежат Башлыковой Оксане Михайловне</div>
+      <div style="opacity:.65;">English Bootcamp</div>
     </div>
   </div>
 
@@ -558,7 +695,6 @@ function setStatus(txt){
 }
 
 function escForSrcdoc(html){
-  // Escape for single-quoted srcdoc
   return html
     .replace(/&/g,'&amp;')
     .replace(/'/g,'&#39;')
@@ -627,17 +763,16 @@ function buildGameHtml(state){
   const qBlock = tasks.map(x=>x.q).join('\\n');
   const aBlock = tasks.map(x=>`${x.a0}|${x.a1}|${x.a2}`).join('\\n');
 
-  // Neon / UI
   const ui = state.neonOn ? state.uiColor : '#7a7a7a';
 
   const bgCSS = (()=>{
     if(state.bgMode === 'transparent') return `background:transparent;`;
+    if(state.bgMode === 'color') return `background:${state.bgColor};`;
     const url = state.bgMode === 'upload' ? state.bgDataURL : state.bgUrl;
     return `background:url('${url}') center/cover no-repeat;`;
   })();
 
   const overlayBgRGBA = (()=>{
-    // overlayBg is hex, alpha separately
     const hex = state.overlayBg.replace('#','');
     const r = parseInt(hex.slice(0,2),16);
     const g = parseInt(hex.slice(2,4),16);
@@ -655,12 +790,10 @@ function buildGameHtml(state){
         0 0 18px rgba(0,255,213,.22) inset !important;
     }` : ``;
 
-  // Build gears HTML (2..5)
   const gearHTML = Array.from({length: state.gearCount}, (_,i)=>`
     <div class="gear" id="g${i}"><div class="img"></div><div class="label"></div></div>
   `).join('');
 
-  // Music URL: dataURL or empty
   const MUSIC_URL = state.musicDataURL || "";
 
   return `<!doctype html>
@@ -674,19 +807,33 @@ function buildGameHtml(state){
   :root{
     --ui:${ui};
     --danger:#ff2b2b;
-    --text:${state.textColor};
-    --glass:rgba(0,0,0,.34);
 
     --qTop:${state.qTop}px;
     --centerLift:${state.centerLift}px;
     --gearGapPx:${state.gearGap}px;
+
+    --qFont:${state.qFont};
+    --qSize:${state.qFontSize}px;
+    --qColor:${state.qColor};
+
+    --aFont:${state.aFont};
+    --aSize:${state.aFontSize}px;
+    --aColor:${state.aColor};
+
+    --ovTitleFont:${state.ovTitleFont};
+    --ovTitleSize:${state.ovTitleSize}px;
+    --ovTitleColor:${state.ovTitleColor};
+
+    --ovTextFont:${state.ovTextFont};
+    --ovTextSize:${state.ovTextSize}px;
+    --ovTextColor:${state.ovTextColor};
   }
 
   html,body{
     margin:0; width:100%; height:100%;
     overflow:hidden;
     ${state.bgMode==='transparent' ? 'background:transparent;' : 'background:#000;'}
-    font-family:${state.fontFamily};
+    font-family:Arial, sans-serif;
   }
   #APP{position:relative;width:100%;height:100%; overflow:hidden;}
 
@@ -708,7 +855,7 @@ function buildGameHtml(state){
   #lives{
     display:flex; gap:10px; align-items:center;
     padding:12px 14px; border-radius:18px;
-    background:var(--glass); backdrop-filter: blur(6px);
+    background:rgba(0,0,0,.34); backdrop-filter: blur(6px);
     box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 0 0 2px rgba(255,43,43,.18) inset, 0 0 22px rgba(255,43,43,.14);
   }
   .heart{
@@ -721,7 +868,7 @@ function buildGameHtml(state){
   #progress{
     display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;
     padding:12px 14px; border-radius:18px;
-    background:var(--glass); backdrop-filter: blur(6px);
+    background:rgba(0,0,0,.34); backdrop-filter: blur(6px);
     box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 0 0 2px rgba(0,255,213,.18) inset, 0 0 22px rgba(0,255,213,.14);
   }
   .pbox{
@@ -742,7 +889,7 @@ function buildGameHtml(state){
   #timerWrap{
     display:flex; align-items:center; gap:12px;
     padding:12px 16px; border-radius:18px;
-    background:var(--glass); backdrop-filter: blur(6px);
+    background:rgba(0,0,0,.34); backdrop-filter: blur(6px);
     box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 0 0 2px rgba(0,255,213,.18) inset, 0 0 22px rgba(0,255,213,.14);
     user-select:none;
   }
@@ -753,7 +900,7 @@ function buildGameHtml(state){
   }
   #timerText{
     min-width:52px; font-size:38px; line-height:1; font-weight:900;
-    color:var(--text); text-shadow:0 2px 16px rgba(0,0,0,.8); text-align:right;
+    color:var(--qColor); text-shadow:0 2px 16px rgba(0,0,0,.8); text-align:right;
   }
   #timerWrap.danger{
     box-shadow: 0 0 0 1px rgba(255,43,43,.72), 0 0 0 2px rgba(255,43,43,.18) inset, 0 0 28px rgba(255,43,43,.22);
@@ -765,9 +912,9 @@ function buildGameHtml(state){
 
   #musicBtn{
     width:56px;height:56px; border-radius:18px; border:none; cursor:pointer;
-    background:var(--glass); backdrop-filter: blur(6px);
+    background:rgba(0,0,0,.34); backdrop-filter: blur(6px);
     box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 0 0 2px rgba(0,255,213,.18) inset, 0 0 22px rgba(0,255,213,.14);
-    color:var(--text); font-size:24px; font-weight:900; pointer-events:auto;
+    color:var(--qColor); font-size:24px; font-weight:900; pointer-events:auto;
     transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
   }
   #musicBtn:hover{transform:translateY(-1px); box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 0 0 2px rgba(0,255,213,.35) inset, 0 0 28px rgba(0,255,213,.22);}
@@ -777,8 +924,10 @@ function buildGameHtml(state){
     position:absolute; left:50%; top:var(--qTop); transform:translateX(-50%);
     width:min(860px, calc(100% - 300px)); height:96px; z-index:5;
     display:flex; align-items:center; justify-content:center;
-    padding:12px 28px; color:var(--text); text-align:center; font-weight:900;
-    font-size:clamp(15px, 1.85vw, 24px);
+    padding:12px 28px; text-align:center; font-weight:900;
+    font-family:var(--qFont);
+    font-size:var(--qSize);
+    color:var(--qColor);
     line-height:1.12; text-shadow:0 2px 16px rgba(0,0,0,.85);
     pointer-events:none;
   }
@@ -820,9 +969,10 @@ function buildGameHtml(state){
     padding:10px 12px; border-radius:14px;
     background:rgba(0,0,0,.50);
     box-shadow: 0 0 0 2px rgba(255,255,255,.10), 0 0 18px rgba(0,255,213,.10);
-    color:var(--text);
     font-weight:900; text-align:center; line-height:1.05;
-    font-size:clamp(14px, 1.5vw, 20px);
+    font-family:var(--aFont);
+    font-size:var(--aSize);
+    color:var(--aColor);
     text-shadow:0 2px 14px rgba(0,0,0,.9);
     user-select:none; pointer-events:none;
   }
@@ -836,7 +986,7 @@ function buildGameHtml(state){
     100%{transform:translate(-50%,-50%)}
   }
 
-  /* ===== OVERLAY (Genially-safe) ===== */
+  /* ===== OVERLAY ===== */
   #OVERLAY{
     position:absolute !important;
     inset:0 !important;
@@ -868,7 +1018,6 @@ function buildGameHtml(state){
       0 18px 60px rgba(0,0,0,.55) !important;
 
     text-align:center !important;
-    color:var(--text) !important;
     position:relative !important;
     overflow:hidden !important;
     margin:0 auto !important;
@@ -894,15 +1043,18 @@ function buildGameHtml(state){
   }
   #OVERLAY .title{
     font-weight:900 !important;
-    font-size:clamp(30px, 3.6vw, 56px) !important;
+    font-family:var(--ovTitleFont) !important;
+    font-size:var(--ovTitleSize) !important;
     margin:0 0 10px !important;
-    color:var(--text) !important;
+    color:var(--ovTitleColor) !important;
     line-height:1.03 !important;
     letter-spacing:.3px !important;
     text-shadow: 0 0 18px rgba(0,255,213,.14), 0 2px 18px rgba(0,0,0,.9) !important;
   }
   #OVERLAY .subtitle{
-    font-size:clamp(14px, 1.55vw, 18px) !important;
+    font-family:var(--ovTextFont) !important;
+    font-size:var(--ovTextSize) !important;
+    color:var(--ovTextColor) !important;
     opacity:.95 !important;
     margin:0 auto 20px !important;
     max-width:780px !important;
@@ -914,7 +1066,7 @@ function buildGameHtml(state){
     cursor:pointer !important; border:none !important;
     padding:14px 26px !important; border-radius:18px !important;
     font-weight:900 !important; letter-spacing:.6px !important;
-    color:var(--text) !important;
+    color:var(--ovTitleColor) !important;
     background:rgba(0,0,0,.38) !important;
     box-shadow: 0 0 0 2px rgba(0,255,213,.42), 0 0 28px rgba(0,255,213,.14) !important;
     text-shadow:0 2px 14px rgba(0,0,0,.92) !important;
@@ -1328,7 +1480,6 @@ function animate(){
   const N = gears.length;
   for(let i=0;i<N;i++){
     const ang = orbitT + i * (Math.PI * 2 / N);
-
     const x = Math.cos(ang) * R;
     const y = Math.sin(ang) * R;
 
@@ -1393,16 +1544,13 @@ init();
 =========================== */
 async function collectState(){
   const tasks = parseTasks($('tasksTA').value);
-  // if fewer than 10 lines, pad with defaults
   while(tasks.length < 10){
     const d = parseTasks(defaultTasks)[tasks.length];
     if(!d) break;
     tasks.push(d);
   }
-  // if more, cut
   const tasks10 = tasks.slice(0,10);
 
-  // images: URL OR upload dataURL if file chosen
   const bgMode = $('bgMode').value;
   const bgDataURL = await fileToDataURL($('bgFile').files[0]);
 
@@ -1415,21 +1563,21 @@ async function collectState(){
 
   const musicData = await fileToDataURL($('musicFile').files[0]);
 
-  const state = {
+  return {
     tasks: tasks10,
+
     timePerQ: +$('timePerQ').value || 10,
     lives: +$('lives').value || 3,
     targetScore: +$('targetScore').value || 10,
     dangerAt: +$('dangerAt').value || 5,
 
-    fontFamily: $('fontFamily').value.trim() || "Arial, sans-serif",
-    textColor: $('textColor').value,
     neonOn: $('neonOn').checked,
     uiColor: $('uiColor').value,
 
     bgMode,
     bgUrl: $('bgUrl').value.trim(),
     bgDataURL,
+    bgColor: $('bgColor').value,
 
     heartURL: heartData || $('heartUrl').value.trim(),
     timerIconURL: timerData || $('timerUrl').value.trim(),
@@ -1442,12 +1590,26 @@ async function collectState(){
     spinSelf: $('spinSelf').checked,
     orbitSpeed: +$('orbitSpeed').value || 0.75,
     spinSpeed: +$('spinSpeed').value || 1,
-
     centerLift: +$('centerLift').value || 49,
     gearGap: +$('gearGap').value || 5,
     orbitK: +$('orbitK').value || 0.80,
 
-    qTop: 17,
+    // typography
+    qFont: $('qFont').value,
+    qFontSize: +$('qFontSize').value || 22,
+    qColor: $('qColor').value,
+
+    aFont: $('aFont').value,
+    aFontSize: +$('aFontSize').value || 18,
+    aColor: $('aColor').value,
+
+    ovTitleFont: $('ovTitleFont').value,
+    ovTitleSize: +$('ovTitleSize').value || 52,
+    ovTitleColor: $('ovTitleColor').value,
+
+    ovTextFont: $('ovTextFont').value,
+    ovTextSize: +$('ovTextSize').value || 18,
+    ovTextColor: $('ovTextColor').value,
 
     overlayBg: $('overlayBg').value,
     overlayAlpha: Math.max(0, Math.min(1, +$('overlayAlpha').value || 0.58)),
@@ -1458,6 +1620,8 @@ async function collectState(){
     musicVol: Math.max(0, Math.min(1, +$('musicVol').value || 0.55)),
     sfxVol: Math.max(0, Math.min(1, +$('sfxVol').value || 0.20)),
     tickVol: Math.max(0, Math.min(1, +$('tickVol').value || 0.08)),
+
+    qTop: 17,
 
     texts:{
       gameTitle: $('gameTitle').value.trim(),
@@ -1472,7 +1636,6 @@ async function collectState(){
       overText: $('overText').value.trim(),
     }
   };
-  return state;
 }
 
 /* ===========================
@@ -1486,7 +1649,6 @@ async function applyPreview(){
 
   const iframeCode = `<iframe style="width:100%;height:100%;border:0" srcdoc='${escForSrcdoc(html)}'></iframe>`;
   $('iframeOut').value = iframeCode;
-
   setStatus('готово');
 }
 
@@ -1498,23 +1660,41 @@ $('copyBtn').addEventListener('click', async ()=>{
     await navigator.clipboard.writeText($('iframeOut').value);
     setStatus('скопировано ✅');
   }catch(e){
-    alert("Не удалось скопировать. Если Genially/браузер блокирует clipboard — скопируй вручную из поля 'Iframe код'.");
+    alert("Не удалось скопировать автоматически. Можно нажать Ctrl+C по кнопке ещё раз или открыть сайт по https (GitHub Pages).");
   }
 });
 
 $('resetBtn').addEventListener('click', ()=>{
-  // minimal reset to base
   $('tasksTA').value = defaultTasks;
+
   $('timePerQ').value = 10;
   $('lives').value = 3;
   $('targetScore').value = 10;
   $('dangerAt').value = 5;
-  $('fontFamily').value = "Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
-  $('textColor').value = "#eaffff";
+
   $('neonOn').checked = true;
   $('uiColor').value = "#00ffd5";
+
   $('bgMode').value = "url";
   $('bgUrl').value = "https://img.genially.com/67961b32a116fb001568a75e/d58b1f28-a8e9-4bdf-93d2-0e9c18b8588c.png";
+  $('bgColor').value = "#000000";
+
+  $('qFont').value = "Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  $('qFontSize').value = 22;
+  $('qColor').value = "#eaffff";
+
+  $('aFont').value = "Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  $('aFontSize').value = 18;
+  $('aColor').value = "#eaffff";
+
+  $('ovTitleFont').value = "Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  $('ovTitleSize').value = 52;
+  $('ovTitleColor').value = "#eaffff";
+
+  $('ovTextFont').value = "Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  $('ovTextSize').value = 18;
+  $('ovTextColor').value = "#eaffff";
+
   $('gearCount').value = 3;
   $('spinSelf').checked = true;
   $('orbitSpeed').value = 0.75;
