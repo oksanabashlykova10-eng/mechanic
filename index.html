@@ -601,7 +601,10 @@
       <button class="btn primary" id="applyBtn">Обновить превью</button>
       <button class="btn" id="copyBtn">Скопировать iframe для Genially</button>
       <button class="btn danger" id="resetBtn">Сбросить к базовым</button>
-      <textarea id="iframeOut" style="position:absolute;left:-9999px;top:-9999px;height:1px;width:1px;opacity:0;"></textarea>
+      <textarea id="iframeOut" readonly
+        style="width:100%;height:140px;margin-top:10px;resize:vertical;
+               background:rgba(0,0,0,.25);border:1px solid rgba(0,255,213,.25);
+               border-radius:12px;color:#eaffff;padding:10px;font-size:12px;line-height:1.2;"></textarea>
     </div>
 
     <div class="footer">
@@ -1658,8 +1661,14 @@ $('copyBtn').addEventListener('click', async ()=>{
     await applyPreview();
     await navigator.clipboard.writeText($('iframeOut').value);
     setStatus('скопировано ✅');
-  }catch(e){
-    alert("Не удалось скопировать автоматически. Можно нажать Ctrl+C по кнопке ещё раз или открыть сайт по https (GitHub Pages).");
+   }catch(e){
+    // fallback для Genially: выделяем код, чтобы можно было Ctrl+C
+    const ta = $('iframeOut');
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    setStatus('выделено → Ctrl+C');
+    alert("Автокопирование заблокировано Genially. Код выделен — нажми Ctrl+C.");
   }
 });
 
