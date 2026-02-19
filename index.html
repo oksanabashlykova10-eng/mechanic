@@ -760,9 +760,11 @@ $('tasksTA').value = defaultTasks;
    Build game HTML (template)
 =========================== */
 function parseTasks(text){
-  const lines = (text || "").split(/
-?
-|\n/g).map(l=>l.trim()).filter(Boolean);
+  const lines = (text || "")
+    .split(/\r?\n|\\n/g)
+    .map(l=>l.trim())
+    .filter(Boolean);
+
   const items = [];
   for(const ln of lines){
     const parts = ln.split('|').map(x=>x.trim()).filter(Boolean);
@@ -777,7 +779,7 @@ function buildGameHtml(state){
   const t = state.texts;
   const tasks = state.tasks;
   const qBlock = tasks.map(x=>x.q).join('\n');
-const aBlock = tasks.map(x=>`${x.a0}|${x.a1}|${x.a2}`).join('\n');
+  const aBlock = tasks.map(x => (x.answers || []).join('|')).join('\n');
   const ui = state.neonOn ? state.uiColor : '#7a7a7a';
 
   const bgCSS = (()=>{
