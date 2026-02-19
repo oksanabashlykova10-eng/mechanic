@@ -151,16 +151,17 @@
       <button class="tabBtn" data-tab="gears">Шестерёнки</button>
       <button class="tabBtn" data-tab="screens">Заставки</button>
       <button class="tabBtn" data-tab="audio">Аудио</button>
+          <button class="tabBtn" data-tab="code">Код</button>
     </div>
 
     <div class="content">
       <!-- TASKS -->
       <div class="section active" id="sec_tasks">
         <div class="card">
-          <h3>10 заданий (формат: вопрос | правильный | неправильный | неправильный)</h3>
+          <h3>10 заданий (формат: вопрос | правильный | неправильный ...; количество ответов = числу шестерёнок)</h3>
           <label>Список заданий (10 строк)</label>
           <textarea id="tasksTA"></textarea>
-          <div class="help">Пример строки: <b>I ___ running. | am | is | are</b> (первый ответ = правильный)</div>
+          <div class="help">Пример строки: <b>I ___ running. | am | is | are</b> (первый ответ = правильный). Если шестерёнок 4 — добавь 4-й вариант и т.д.</div>
           <div class="mini">Ответы в игре перемешиваются автоматически.</div>
         </div>
 
@@ -594,18 +595,27 @@
             </div>
           </div>
         </div>
+      
+      <!-- CODE -->
+      <div class="section" id="sec_code">
+        <div class="card">
+          <h3>iframe для Genially</h3>
+          <div class="mini">Нажми «Скопировать iframe…». Если браузер/Genially не даст скопировать автоматически — текст будет выделен, нажми <b>Ctrl+C</b>.</div>
+          <textarea id="iframeOut" readonly spellcheck="false"
+            style="width:100%; height:44vh; min-height:260px; resize:vertical;
+                   background:rgba(0,0,0,.25);border:1px solid rgba(0,255,213,.25);
+                   border-radius:12px;color:#eaffff;padding:10px;font-size:12px;line-height:1.2; margin-top:10px;"></textarea>
+        </div>
       </div>
+
+</div>
     </div>
 
     <div class="btnRow">
       <button class="btn primary" id="applyBtn">Обновить превью</button>
       <button class="btn" id="copyBtn">Скопировать iframe для Genially</button>
       <button class="btn danger" id="resetBtn">Сбросить к базовым</button>
-      <textarea id="iframeOut" readonly
-        style="width:100%;height:140px;margin-top:10px;resize:vertical;
-               background:rgba(0,0,0,.25);border:1px solid rgba(0,255,213,.25);
-               border-radius:12px;color:#eaffff;padding:10px;font-size:12px;line-height:1.2;"></textarea>
-    </div>
+</div>
 
     <div class="footer">
       <div class="copy">© Все права принадлежат Башлыковой Оксане Михайловне</div>
@@ -750,12 +760,15 @@ $('tasksTA').value = defaultTasks;
    Build game HTML (template)
 =========================== */
 function parseTasks(text){
-const lines = (text || "").split(/\r?\n|\\n/g).map(l=>l.trim()).filter(Boolean);
+  const lines = (text || "").split(/
+?
+|\n/g).map(l=>l.trim()).filter(Boolean);
   const items = [];
   for(const ln of lines){
-    const parts = ln.split('|').map(x=>x.trim());
-    if(parts.length < 4) continue;
-    items.push({q: parts[0], a0: parts[1], a1: parts[2], a2: parts[3]});
+    const parts = ln.split('|').map(x=>x.trim()).filter(Boolean);
+    // Формат: Вопрос | правильный | неправильный | ... (2–5 ответов)
+    if(parts.length < 3) continue; // минимум для 2 шестерёнок: вопрос + 2 ответа
+    items.push({ q: parts[0], answers: parts.slice(1) });
   }
   return items;
 }
@@ -1242,14 +1255,14 @@ function shuffle(arr){
   return arr;
 }
 function parseBlocks(qBlock, aBlock){
-  const qs = qBlock.split("\\n").map(s=>s.trim()).filter(Boolean);
-  const as = aBlock.split("\\n").map(s=>s.trim()).filter(Boolean);
+  const qs = qBlock.split("\n").map(s=>s.trim()).filter(Boolean);
+  const as = aBlock.split("\n").map(s=>s.trim()).filter(Boolean);
   const n = Math.min(qs.length, as.length);
   const items = [];
   for(let i=0;i<n;i++){
-    const parts = as[i].split("|").map(x=>x.trim());
-    if(parts.length < 3) continue;
-    items.push({ q: qs[i], correct: parts[0], wrong: [parts[1], parts[2]] });
+    const parts = as[i].split("|").map(x=>x.trim()).filter(Boolean);
+    if(parts.length < 2) continue; // хотя бы 2 ответа
+    items.push({ q: qs[i], correct: parts[0], wrong: parts.slice(1) });
   }
   return items;
 }
@@ -1402,17 +1415,22 @@ function nextQuestion(){
 
   questionBox.textContent = current.q;
 
+  const N = gears.length; // = количеству шестерёнок (2..5)
+
   const answers = [
     {text: current.correct, ok:true},
-    {text: current.wrong[0], ok:false},
-    {text: current.wrong[1], ok:false}
+    ...((current.wrong || []).slice(0, Math.max(0, N-1)).map(t => ({text:t, ok:false})))
   ];
+
+  // если вдруг в строке меньше неправильных, чем нужно — добиваем пустыми (чтобы не ломалось)
+  while(answers.length < N) answers.push({text:"", ok:false});
+
   shuffle(answers);
 
-  answers.forEach((a,i)=>{
-    labels[i].textContent = a.text;
-    gears[i].dataset.ok = a.ok ? "1" : "0";
-  });
+  for(let i=0;i<N;i++){
+    labels[i].textContent = answers[i].text || "";
+    gears[i].dataset.ok = answers[i].ok ? "1" : "0";
+  }
 
   startTimer();
 }
