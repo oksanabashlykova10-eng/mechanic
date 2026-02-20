@@ -737,6 +737,10 @@ tabWrap.addEventListener('click', (e)=>{
   const key = b.dataset.tab;
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec_'+key).classList.add('active');
+
+  if(key==='code' && !$('iframeOut').value.trim()){
+    try{ applyPreview(); }catch(e){}
+  }
 });
 
 /* ===========================
@@ -756,6 +760,9 @@ I ___ tired. | am | is | are`;
 
 $('tasksTA').value = defaultTasks;
 
+
+// автозапуск превью и генерации iframe-кода
+setTimeout(()=>{ try{ applyPreview(); }catch(e){} }, 50);
 /* ===========================
    Build game HTML (template)
 =========================== */
