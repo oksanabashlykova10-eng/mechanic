@@ -142,7 +142,7 @@
           <div class="t2">Настройка → предпросмотр → копирование iframe</div>
         </div>
       </div>
-      <div class="badge">1 список / 10 заданий</div>
+      <div class="badge" id="badgeTasks">1 список / 10 заданий</div>
     </div>
 
     <div class="tabs" id="tabs">
@@ -151,22 +151,33 @@
       <button class="tabBtn" data-tab="gears">Шестерёнки</button>
       <button class="tabBtn" data-tab="screens">Заставки</button>
       <button class="tabBtn" data-tab="audio">Аудио</button>
-          <button class="tabBtn" data-tab="code">Код</button>
+        <button class="tabBtn" data-tab="code">Код</button>
     </div>
 
     <div class="content">
       <!-- TASKS -->
       <div class="section active" id="sec_tasks">
         <div class="card">
-          <h3>10 заданий (формат: вопрос | правильный | неправильный ...; количество ответов = числу шестерёнок)</h3>
-          <label>Список заданий (10 строк)</label>
+          <h3><span id="tasksTitleCount">10</span> заданий (формат: вопрос | правильный | неправильные...)</h3>
+          <label id="tasksLabel">Список заданий (10 строк)</label>
           <textarea id="tasksTA"></textarea>
-          <div class="help">Пример строки: <b>I ___ running. | am | is | are</b> (первый ответ = правильный). Если шестерёнок 4 — добавь 4-й вариант и т.д.</div>
+          <div class="help">Пример строки: <b>I ___ running. | am | is | are</b> (первый ответ = правильный)</div>
           <div class="mini">Ответы в игре перемешиваются автоматически.</div>
-        </div>
+        <div class="help" id="tasksFormatHint" style="margin-top:8px;"></div>
+          <div class="help" id="tasksWarn" style="display:none; margin-top:6px; color:rgba(255,180,180,.95);"></div>
+          </div>
 
         <div class="card">
           <h3>Базовые параметры</h3>
+          <div class="row">
+            <div>
+              <label>Количество вопросов / контейнеров (6–14)</label>
+              <input id="taskCount" type="number" min="6" max="14" value="10"/>
+              <div class="mini">Это число задаёт: (1) сколько строк брать из списка заданий и (2) сколько “маркер-контейнеров” нужно заполнить для победы.</div>
+            </div>
+            <div class="mini" style="align-self:end;">Если строк меньше — редактор подставит недостающие из дефолтного списка.</div>
+          </div>
+
           <div class="row">
             <div>
               <label>Таймер (секунд на вопрос)</label>
@@ -180,7 +191,7 @@
           <div class="row">
             <div>
               <label>Сколько правильных ответов для победы</label>
-              <input id="targetScore" type="number" min="1" max="50" value="10"/>
+              <input id="targetScore" type="number" min="6" max="14" value="10" readonly/>
             </div>
             <div>
               <label>Красный таймер при (сек)</label>
@@ -587,7 +598,7 @@
           <div class="row">
             <div>
               <label>Громкость SFX (0..1)</label>
-              <input id="sfxVol" type="number" min="0" max="1" step="0.05" value="0.20"/>
+              <input id="sfxVol" type="number" min="0" max="1" step="0.05" value="0.60"/>
             </div>
             <div>
               <label>Громкость “тика” (0..1)</label>
@@ -595,21 +606,19 @@
             </div>
           </div>
         </div>
-      
-      <!-- CODE -->
+      </div>
+    </div>
       <div class="section" id="sec_code">
         <div class="card">
           <h3>iframe для Genially</h3>
-          <div class="mini">Нажми «Скопировать iframe…». Если браузер/Genially не даст скопировать автоматически — текст будет выделен, нажми <b>Ctrl+C</b>.</div>
+          <div class="mini">Нажми «Скопировать iframe…». Если автокопирование заблокировано, код выделится — нажми Ctrl+C.</div>
           <textarea id="iframeOut" readonly spellcheck="false"
-            style="width:100%; height:44vh; min-height:260px; resize:vertical;
+            style="width:100%;height:44vh;min-height:260px;resize:vertical;
                    background:rgba(0,0,0,.25);border:1px solid rgba(0,255,213,.25);
-                   border-radius:12px;color:#eaffff;padding:10px;font-size:12px;line-height:1.2; margin-top:10px;"></textarea>
+                   border-radius:12px;color:#eaffff;padding:10px;font-size:12px;line-height:1.2;"></textarea>
         </div>
       </div>
 
-</div>
-    </div>
 
     <div class="btnRow">
       <button class="btn primary" id="applyBtn">Обновить превью</button>
@@ -737,10 +746,6 @@ tabWrap.addEventListener('click', (e)=>{
   const key = b.dataset.tab;
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec_'+key).classList.add('active');
-
-  if(key==='code' && !$('iframeOut').value.trim()){
-    try{ applyPreview(); }catch(e){}
-  }
 });
 
 /* ===========================
@@ -760,24 +765,110 @@ I ___ tired. | am | is | are`;
 
 $('tasksTA').value = defaultTasks;
 
+/* ===========================
+   Dynamic counts UI
+=========================== */
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+function updateCountsUI(){
+  const n = clamp(+$('taskCount')?.value || 10, 6, 14);
+  const tt = $('tasksTitleCount');
+  if(tt) tt.textContent = String(n);
+  const bd = $('badgeTasks');
+  if(bd) bd.textContent = `1 список / ${n} заданий`;
+  // targetScore tied to taskCount
+  const ts = $('targetScore');
+  if(ts){
+    ts.value = String(n);
+    ts.min = String(n);
+    ts.max = String(n);
+  }
+}
+updateCountsUI();
+$('taskCount')?.addEventListener('input', ()=>{ updateCountsUI(); });
+$('taskCount')?.addEventListener('change', ()=>{ updateCountsUI(); });
+/* ===========================
+   Tasks format hint + validation (gearCount-aware)
+=========================== */
+function getExpectedAnswers(){
+  return clamp(+$('gearCount')?.value || 3, 2, 5);
+}
 
-// автозапуск превью и генерации iframe-кода
-setTimeout(()=>{ try{ applyPreview(); }catch(e){} }, 50);
+function updateTasksHintAndValidate(){
+  const nTasks = clamp(+$('taskCount')?.value || 10, 6, 14);
+  const nAns = getExpectedAnswers();
+
+  const lbl = $('tasksLabel');
+  if(lbl) lbl.textContent = `Список заданий (${nTasks} строк)`;
+
+  const hint = $('tasksFormatHint');
+  if(hint){
+    hint.innerHTML = `Сейчас выбрано <b>${nAns}</b> шестерён${nAns===1?'ка':(nAns>=2 && nAns<=4 ? 'ки' : 'ок')} → в каждой строке нужно <b>${nAns}</b> вариантов ответа после вопроса.<br>
+    Формат: <b>вопрос | правильный | ${nAns>=2?'ответ 2':''}${nAns>=3?' | ответ 3':''}${nAns>=4?' | ответ 4':''}${nAns>=5?' | ответ 5':''}</b>`;
+  }
+
+  const ta = $('tasksTA');
+  const warn = $('tasksWarn');
+  if(!ta || !warn) return;
+
+  const rawLines = (ta.value || "").split(/\n/g);
+  const bad = [];
+  const extra = [];
+
+  rawLines.forEach((line, idx)=>{
+    const s = (line || "").trim();
+    if(!s) return;
+    const parts = s.split('|').map(x=>x.trim()).filter(x=>x!=="" );
+    // parts: [q, a1, a2, ...]
+    if(parts.length < 1 + nAns){
+      bad.push({i: idx+1, s});
+    }else if(parts.length > 1 + nAns){
+      extra.push({i: idx+1, s});
+    }
+  });
+
+  if(bad.length === 0 && extra.length === 0){
+    warn.style.display = "none";
+    warn.textContent = "";
+    return;
+  }
+
+  const linesBad = bad.slice(0,6).map(x=>x.i).join(', ');
+  const linesExtra = extra.slice(0,6).map(x=>x.i).join(', ');
+  const partsTxt = `нужно: вопрос + ${nAns} ответ(а) через "|"`;
+
+  let msg = "";
+  if(bad.length){
+    msg += `⚠️ Недостаточно вариантов в строках: <b>${linesBad}</b> (${partsTxt}).`;
+  }
+  if(extra.length){
+    msg += (msg ? "<br>" : "") + `ℹ️ Лишние варианты (будут обрезаны до ${nAns}) в строках: <b>${linesExtra}</b>.`;
+  }
+  warn.style.display = "block";
+  warn.innerHTML = msg;
+}
+
+updateTasksHintAndValidate();
+$('gearCount')?.addEventListener('input', updateTasksHintAndValidate);
+$('gearCount')?.addEventListener('change', updateTasksHintAndValidate);
+$('taskCount')?.addEventListener('input', updateTasksHintAndValidate);
+$('taskCount')?.addEventListener('change', updateTasksHintAndValidate);
+$('tasksTA')?.addEventListener('input', ()=>{ updateTasksHintAndValidate(); });
+
+
+
 /* ===========================
    Build game HTML (template)
 =========================== */
 function parseTasks(text){
-  const lines = (text || "")
-    .split(/\r?\n|\\n/g)
-    .map(l=>l.trim())
-    .filter(Boolean);
-
+  const lines = (text || "").split(/\n/g).map(l=>l.trim()).filter(Boolean);
   const items = [];
   for(const ln of lines){
-    const parts = ln.split('|').map(x=>x.trim()).filter(Boolean);
-    // Формат: Вопрос | правильный | неправильный | ... (2–5 ответов)
-    if(parts.length < 3) continue; // минимум для 2 шестерёнок: вопрос + 2 ответа
-    items.push({ q: parts[0], answers: parts.slice(1) });
+    const parts = ln.split('|').map(x=>x.trim());
+    // минимум: вопрос + 2 ответа
+    if(parts.length < 3) continue;
+    const q = parts[0];
+    const answers = parts.slice(1).filter(x=>x!=="" );
+    items.push({q, answers});
   }
   return items;
 }
@@ -785,8 +876,7 @@ function parseTasks(text){
 function buildGameHtml(state){
   const t = state.texts;
   const tasks = state.tasks;
-  const qBlock = tasks.map(x=>x.q).join('\n');
-  const aBlock = tasks.map(x => (x.answers || []).join('|')).join('\n');
+  const TASKS_JSON = JSON.stringify(tasks);
   const ui = state.neonOn ? state.uiColor : '#7a7a7a';
 
   const bgCSS = (()=>{
@@ -1161,8 +1251,7 @@ const TEXTS = {
   overText: ${JSON.stringify(t.overText)},
 };
 
-const QUESTIONS_BLOCK = ${JSON.stringify(qBlock)};
-const ANSWERS_BLOCK = ${JSON.stringify(aBlock)};
+const TASKS = ${TASKS_JSON};
 
 const el = (id)=>document.getElementById(id);
 const gears = Array.from(document.querySelectorAll('.gear'));
@@ -1263,20 +1352,16 @@ function shuffle(arr){
   }
   return arr;
 }
-function parseBlocks(qBlock, aBlock){
-  const qs = qBlock.split("\n").map(s=>s.trim()).filter(Boolean);
-  const as = aBlock.split("\n").map(s=>s.trim()).filter(Boolean);
-  const n = Math.min(qs.length, as.length);
-  const items = [];
-  for(let i=0;i<n;i++){
-    const parts = as[i].split("|").map(x=>x.trim()).filter(Boolean);
-    if(parts.length < 2) continue; // хотя бы 2 ответа
-    items.push({ q: qs[i], correct: parts[0], wrong: parts.slice(1) });
-  }
-  return items;
+function normalizeTask(t){
+  const q = String((t && t.q) || "");
+  const answers = Array.isArray(t && t.answers) ? t.answers.map(x=>String(x||"").trim()) : [];
+  return { q, answers: answers.filter(Boolean) };
 }
+
 function buildDeck(){
-  const items = parseBlocks(QUESTIONS_BLOCK, ANSWERS_BLOCK);
+  const items = (Array.isArray(TASKS) ? TASKS : [])
+    .map(normalizeTask)
+    .filter(x=>x.q && x.answers.length >= 2);
   shuffle(items);
   return items.slice(0, TARGET_SCORE);
 }
@@ -1424,22 +1509,21 @@ function nextQuestion(){
 
   questionBox.textContent = current.q;
 
-  const N = gears.length; // = количеству шестерёнок (2..5)
+  const raw = Array.isArray(current.answers) ? current.answers.slice() : [];
+  const correct = raw[0] || "";
+  const wrongs = raw.slice(1);
 
-  const answers = [
-    {text: current.correct, ok:true},
-    ...((current.wrong || []).slice(0, Math.max(0, N-1)).map(t => ({text:t, ok:false})))
-  ];
+  const need = gears.length;
+  const pickedWrongs = wrongs.slice(0, Math.max(0, need - 1));
+  while(pickedWrongs.length < need - 1) pickedWrongs.push("—");
 
-  // если вдруг в строке меньше неправильных, чем нужно — добиваем пустыми (чтобы не ломалось)
-  while(answers.length < N) answers.push({text:"", ok:false});
-
+  const answers = [{text: correct, ok:true}, ...pickedWrongs.map(t=>({text:t, ok:false}))];
   shuffle(answers);
 
-  for(let i=0;i<N;i++){
-    labels[i].textContent = answers[i].text || "";
-    gears[i].dataset.ok = answers[i].ok ? "1" : "0";
-  }
+  answers.forEach((a,i)=>{
+    labels[i].textContent = a.text;
+    gears[i].dataset.ok = a.ok ? "1" : "0";
+  });
 
   startTimer();
 }
@@ -1572,13 +1656,33 @@ init();
    Collect state from editor
 =========================== */
 async function collectState(){
+  // counts
+  const gearCount = Math.max(2, Math.min(5, +$('gearCount').value || 3));
+  const taskCount = Math.max(6, Math.min(14, +$('taskCount').value || 10));
+
+  // tasks
   const tasks = parseTasks($('tasksTA').value);
-  while(tasks.length < 10){
-    const d = parseTasks(defaultTasks)[tasks.length];
+  const fallback = parseTasks(defaultTasks);
+
+  while(tasks.length < taskCount){
+    const d = fallback[tasks.length];
     if(!d) break;
     tasks.push(d);
   }
-  const tasks10 = tasks.slice(0,10);
+
+  const tasksN = tasks.slice(0, taskCount).map(t=>{
+    const ans = Array.isArray(t.answers) ? t.answers.slice(0, gearCount) : [];
+    while(ans.length < gearCount) ans.push("—");
+    return { q: t.q, answers: ans };
+  });
+
+  // sync UI: targetScore tied to taskCount
+  const ts = $('targetScore');
+  if(ts){
+    ts.value = String(taskCount);
+    ts.min = String(taskCount);
+    ts.max = String(taskCount);
+  }
 
   const bgMode = $('bgMode').value;
   const bgDataURL = await fileToDataURL($('bgFile').files[0]);
@@ -1593,11 +1697,12 @@ async function collectState(){
   const musicData = await fileToDataURL($('musicFile').files[0]);
 
   return {
-    tasks: tasks10,
+    tasks: tasksN,
+    taskCount,
 
     timePerQ: +$('timePerQ').value || 10,
     lives: +$('lives').value || 3,
-    targetScore: +$('targetScore').value || 10,
+    targetScore: taskCount,
     dangerAt: +$('dangerAt').value || 5,
 
     neonOn: $('neonOn').checked,
@@ -1615,7 +1720,7 @@ async function collectState(){
     gearURL: gearData || $('gearUrl').value.trim(),
     centerURL: centerData || $('centerUrl').value.trim(),
 
-    gearCount: Math.max(2, Math.min(5, +$('gearCount').value || 3)),
+    gearCount,
     spinSelf: $('spinSelf').checked,
     orbitSpeed: +$('orbitSpeed').value || 0.75,
     spinSpeed: +$('spinSpeed').value || 1,
@@ -1647,7 +1752,7 @@ async function collectState(){
 
     musicDataURL: musicData || "",
     musicVol: Math.max(0, Math.min(1, +$('musicVol').value || 0.55)),
-    sfxVol: Math.max(0, Math.min(1, +$('sfxVol').value || 0.20)),
+    sfxVol: Math.max(0, Math.min(1, +$('sfxVol').value || 0.60)),
     tickVol: Math.max(0, Math.min(1, +$('tickVol').value || 0.08)),
 
     qTop: 17,
@@ -1689,7 +1794,10 @@ $('copyBtn').addEventListener('click', async ()=>{
     await navigator.clipboard.writeText($('iframeOut').value);
     setStatus('скопировано ✅');
    }catch(e){
-    // fallback для Genially: выделяем код, чтобы можно было Ctrl+C
+    // fallback для Genially: показываем вкладку «Код» и выделяем текст
+    const codeTab = document.querySelector('.tabBtn[data-tab="code"]');
+    if(codeTab) codeTab.click();
+    // выделяем код, чтобы можно было Ctrl+C
     const ta = $('iframeOut');
     ta.focus();
     ta.select();
@@ -1702,9 +1810,13 @@ $('copyBtn').addEventListener('click', async ()=>{
 $('resetBtn').addEventListener('click', ()=>{
   $('tasksTA').value = defaultTasks;
 
+  $('taskCount').value = 10;
+
   $('timePerQ').value = 10;
   $('lives').value = 3;
   $('targetScore').value = 10;
+  $('targetScore').min = 10;
+  $('targetScore').max = 10;
   $('dangerAt').value = 5;
 
   $('neonOn').checked = true;
@@ -1755,7 +1867,7 @@ $('resetBtn').addEventListener('click', ()=>{
   $('btnNeonHover').checked = true;
 
   $('musicVol').value = 0.55;
-  $('sfxVol').value = 0.20;
+  $('sfxVol').value = 0.60;
   $('tickVol').value = 0.08;
 
   setStatus('сброшено');
