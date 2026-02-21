@@ -434,6 +434,16 @@
               <input id="orbitK" type="number" min="0.6" max="1.2" step="0.01" value="0.80"/>
             </div>
           </div>
+
+          <div class="row">
+            <div>
+              <label>Смещение подписи ответа (Y, px)</label>
+              <input id="aShiftY" type="number" min="-80" max="80" value="0"/>
+              <div class="mini">Сдвиг вверх (минус) или вниз (плюс), чтобы текст не закрывал персонажа.</div>
+            </div>
+            <div class="mini" style="align-self:end;">Работает для подложки с ответом на каждой шестерёнке/пчёлке.</div>
+          </div>
+
         </div>
       </div>
 
@@ -933,6 +943,7 @@ function buildGameHtml(state){
     --aFont:${state.aFont};
     --aSize:${state.aFontSize}px;
     --aColor:${state.aColor};
+    --aShiftY:${state.aShiftY}px;
 
     --ovTitleFont:${state.ovTitleFont};
     --ovTitleSize:${state.ovTitleSize}px;
@@ -1087,6 +1098,8 @@ function buildGameHtml(state){
     font-family:var(--aFont);
     font-size:var(--aSize);
     color:var(--aColor);
+    transform:translateY(var(--aShiftY));
+    will-change:transform;
     text-shadow:0 2px 14px rgba(0,0,0,.9);
     user-select:none; pointer-events:none;
   }
@@ -1736,6 +1749,7 @@ async function collectState(){
     aFont: $('aFont').value,
     aFontSize: +$('aFontSize').value || 18,
     aColor: $('aColor').value,
+    aShiftY: +$('aShiftY').value || 0,
 
     ovTitleFont: $('ovTitleFont').value,
     ovTitleSize: +$('ovTitleSize').value || 52,
@@ -1833,6 +1847,7 @@ $('resetBtn').addEventListener('click', ()=>{
   $('aFont').value = "Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
   $('aFontSize').value = 18;
   $('aColor').value = "#eaffff";
+  $('aShiftY').value = 0;
 
   $('ovTitleFont').value = "Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
   $('ovTitleSize').value = 52;
